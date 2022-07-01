@@ -1,0 +1,31 @@
+{
+
+    "name": "rootdata21/hati-installer",
+    "description": "Instructs Composer to install Hati on project root directory.",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Abdul Ahad",
+            "email": "csabdulahad@gmail.com",
+            "homepage": "https://abdulahad.net"
+        }
+    ],
+
+    "autoload": {
+        "psr-4": {"hati\\installer\\": "src/hati-installer"}
+    },
+
+    "extra": {
+        "class": "hati\\installer\\Plugin"
+    },
+
+    "require": {
+        "composer-plugin-api": "^2.3.0"
+    },
+
+    "require-dev": {
+        "composer/composer": "2.3.0"
+    }
+
+}
