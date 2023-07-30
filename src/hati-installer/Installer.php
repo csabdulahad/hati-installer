@@ -7,6 +7,7 @@ use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\PartialComposer;
 use Composer\Repository\InstalledRepositoryInterface;
+use Composer\Script\ScriptEvents;
 use hati\config\ConfigWriter;
 use React\Promise\PromiseInterface;
 
@@ -14,10 +15,13 @@ class Installer extends LibraryInstaller {
 
     private string $root;
     private string $hatiDir;
+    protected $composer;
 
     public function __construct(IOInterface $io, PartialComposer $composer, $root) {
+        $this -> composer = $composer;
         $this -> root = $root . DIRECTORY_SEPARATOR;
         $this -> hatiDir = $root . DIRECTORY_SEPARATOR . 'hati' . DIRECTORY_SEPARATOR;
+
         parent::__construct($io, $composer);
     }
 
@@ -72,12 +76,13 @@ class Installer extends LibraryInstaller {
                 $this -> io -> error($result['msg']);
             }
 
+            $this -> dumpAutoload();
         });
     }
 
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target) {
         return parent::update($repo, $initial, $target) -> then(function () {
-            require_once "{$this -> hatiDir}config" . DIRECTORY_SEPARATOR . 'ConfigWriter.php';
+            require_once "{$this -> hatiDir}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
             $result = ConfigWriter::write($this->root);
 
             // show the result to the user
@@ -91,6 +96,16 @@ class Installer extends LibraryInstaller {
 
     public function supports($packageType): bool {
         return 'hati-installer' === $packageType;
+    }
+
+    private function dumpAutoload(): void {
+        $composerJsonPath = $this -> root . 'composer.json';
+        $composerJson = json_decode(file_get_contents($composerJsonPath), true);
+        $composerJson['autoload']['psr-4']['hati\\'] = 'hati/';
+        file_put_contents($composerJsonPath, json_encode($composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        // Regenerate the Composer autoload files to include your classes
+        $this -> composer -> getEventDispatcher() -> dispatchScript(ScriptEvents::POST_AUTOLOAD_DUMP);
     }
 
     public static function rmdir($dir): bool {
