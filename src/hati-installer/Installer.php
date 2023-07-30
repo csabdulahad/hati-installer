@@ -75,7 +75,7 @@ class Installer extends LibraryInstaller {
             } else {
                 $this -> io -> error($result['msg']);
             }
-
+        }) -> then (function () {
             $this -> dumpAutoload();
         });
     }
