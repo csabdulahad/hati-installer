@@ -22,10 +22,7 @@
 
     "require": {
         "composer-plugin-api": "^2.3.0",
-        "ext-json": "*"
-    },
-
-    "require-dev": {
+        "ext-json": "*",
         "composer/composer": "2.3.0"
     }
 
