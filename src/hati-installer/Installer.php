@@ -75,9 +75,12 @@ class Installer extends LibraryInstaller {
             } else {
                 $this -> io -> error($result['msg']);
             }
-        }) -> then (function () {
-            $this -> dumpAutoload();
         });
+    }
+
+    public function cleanup($type, PackageInterface $package, PackageInterface $prevPackage = null): ?PromiseInterface {
+        $this -> dumpAutoload();
+        return parent::cleanup($type, $package, $prevPackage)->then();
     }
 
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target) {
