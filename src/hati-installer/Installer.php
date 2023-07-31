@@ -7,9 +7,11 @@ use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\PartialComposer;
 use Composer\Repository\InstalledRepositoryInterface;
-use Composer\Script\ScriptEvents;
+use FilesystemIterator;
 use hati\config\ConfigWriter;
 use React\Promise\PromiseInterface;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class Installer extends LibraryInstaller {
 
@@ -26,34 +28,29 @@ class Installer extends LibraryInstaller {
     }
 
     public function getInstallPath(PackageInterface $package): string {
-        return 'rootdata21';
+        return 'hati';
     }
 
     public function install(InstalledRepositoryInterface $repo, PackageInterface $package): ?PromiseInterface {
 
-        if (file_exists($this -> hatiDir)) {
-            $choice = $this -> io -> ask('Existing hati folder found. Do you want to delete it? [y/n]: ', 'n');
-            if ($choice === 'y') {
-                self::rmdir($this -> hatiDir);
-            } else {
-                $this -> io -> critical('Hati installation has been cancelled. Please delete hati folder manually.');
-                return null;
-            }
+        // add custom classmap for hati folder being on the root directory
+        $autoload = $package -> getAutoload();
+        if (isset($autoload['psr-4'])) {
+            $customPSR4 = ['hati\\' => '/',];
+            $autoload['psr-4'] = array_merge($autoload['psr-4'], $customPSR4);
+            $package -> setAutoload($autoload);
         }
 
-        return parent::install($repo, $package)->then(function () {
+        return parent::install($repo, $package) -> then(function () {
 
-            // Move hati folder to project root directory
-            $old = $this -> root . 'rootdata21'. DIRECTORY_SEPARATOR .'hati';
-            rename($old, $this -> hatiDir);
-
-            // delete the rootdata21 folder
-            self::rmdir($this -> root . 'rootdata21');
+            // move hati folder to _temp, rename
+            self::copy($this -> root . 'hati' . DIRECTORY_SEPARATOR . 'hati', $this -> root . '_temp');
+            self::rmdir($this -> root . 'hati');
+            rename($this -> root . '_temp',$this -> root . 'hati');
 
             // generate/update the hati.json file on the project root directory
             $createNewConfig = true;
             if (file_exists($this -> root . 'hati.json')) {
-
                 while(true) {
                     $ans = $this -> io -> ask('Existing hati.json found. Do you want to merge it with new config? [y/n]: ');
                     if ($ans !== 'y' && $ans !== 'n') continue;
@@ -71,12 +68,9 @@ class Installer extends LibraryInstaller {
 
                 $welcomeFile = $this -> hatiDir . 'page/welcome.txt';
                 if (file_exists($welcomeFile)) include($welcomeFile);
-
             } else {
                 $this -> io -> error($result['msg']);
             }
-
-            $this -> dumpAutoload();
         });
     }
 
@@ -98,16 +92,6 @@ class Installer extends LibraryInstaller {
         return 'hati-installer' === $packageType;
     }
 
-    private function dumpAutoload(): void {
-        $composerJsonPath = $this -> root . 'composer.json';
-        $composerJson = json_decode(file_get_contents($composerJsonPath), true);
-        $composerJson['autoload']['psr-4']['hati\\'] = 'hati/';
-        file_put_contents($composerJsonPath, json_encode($composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-
-        // Regenerate the Composer autoload files to include your classes
-        $this -> composer -> getEventDispatcher() -> dispatchScript(ScriptEvents::POST_AUTOLOAD_DUMP);
-    }
-
     public static function rmdir($dir): bool {
         if (!file_exists($dir)) return true;
 
@@ -120,6 +104,22 @@ class Installer extends LibraryInstaller {
         }
 
         return rmdir($dir);
+    }
+
+    public static function copy($source, $destination): void {
+        if (!is_dir($destination)) {
+            mkdir($destination, 0755, true);
+        }
+
+        $dirIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+        foreach ($dirIterator as $file) {
+            $target = $destination . DIRECTORY_SEPARATOR . $dirIterator -> getSubPathName();
+            if ($file->isDir()) {
+                mkdir($target);
+            } else {
+                copy($file, $target);
+            }
+        }
     }
 
 }
