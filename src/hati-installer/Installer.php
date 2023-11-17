@@ -17,12 +17,14 @@ class Installer extends LibraryInstaller {
 
     private string $root;
     private string $hatiDir;
+    private string $configPath;
     protected $composer;
 
     public function __construct(IOInterface $io, PartialComposer $composer, $root) {
         $this -> composer = $composer;
         $this -> root = $root . DIRECTORY_SEPARATOR;
         $this -> hatiDir = $root . DIRECTORY_SEPARATOR . 'hati' . DIRECTORY_SEPARATOR;
+		$this -> configPath = $this -> root . 'config' . DIRECTORY_SEPARATOR;
 
         parent::__construct($io, $composer);
     }
@@ -48,19 +50,26 @@ class Installer extends LibraryInstaller {
             self::rmdir($this -> root . 'hati');
             rename($this -> root . '_temp',$this -> root . 'hati');
 
+			// move the config folder out to the root path
+			$dbConfigFile = $this -> configPath . 'db.json';
+			if (!file_exists($dbConfigFile)) {
+				self::copy($this -> hatiDir . 'config', $this -> root . 'config');
+				self::rmdir($this -> hatiDir . 'config');
+			}
+
             // generate/update the hati.json file on the project root directory
             $createNewConfig = true;
-            if (file_exists($this -> root . 'hati.json')) {
+            if (file_exists($this -> configPath . 'hati.json')) {
                 while(true) {
-                    $ans = $this -> io -> ask('Existing hati.json found. Do you want to merge it with new config? [y/n]: ');
+                    $ans = $this -> io -> ask('\nExisting hati.json found. Do you want to merge it with new config? [y/n]: ');
                     if ($ans !== 'y' && $ans !== 'n') continue;
                     break;
                 }
                 $createNewConfig = $ans == 'n';
             }
 
-            require_once "{$this -> hatiDir}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
-            $result = ConfigWriter::write($this->root, $createNewConfig);
+            require_once "{$this -> hatiDir}hati_config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
+            $result = ConfigWriter::write($this -> configPath, $createNewConfig);
 
             // show the result to the user
             if ($result['success']) {
@@ -76,8 +85,8 @@ class Installer extends LibraryInstaller {
 
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target) {
         return parent::update($repo, $initial, $target) -> then(function () {
-            require_once "{$this -> hatiDir}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
-            $result = ConfigWriter::write($this->root);
+            require_once "{$this -> hatiDir}hati_config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
+            $result = ConfigWriter::write($this -> configPath);
 
             // show the result to the user
             if ($result['success']) {
