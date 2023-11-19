@@ -8,7 +8,7 @@ use Composer\Package\PackageInterface;
 use Composer\PartialComposer;
 use Composer\Repository\InstalledRepositoryInterface;
 use FilesystemIterator;
-use hati\config\ConfigWriter;
+use hati\hati_config\ConfigWriter;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
