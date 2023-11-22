@@ -8,7 +8,7 @@ use Composer\Package\PackageInterface;
 use Composer\PartialComposer;
 use Composer\Repository\InstalledRepositoryInterface;
 use FilesystemIterator;
-use hati\hati_config\ConfigWriter;
+use hati\config\ConfigWriter;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -52,7 +52,7 @@ class Installer extends LibraryInstaller {
 			/*
 			 * Move important files to hati folder on project root
 			 * */
-			$files = ['db.json', 'global_func.php', 'init.php', 'tool'];
+			$files = ['db.json', 'init.php', 'tool'];
 			foreach ($files as $file) {
 				$toPath =  "{$this -> hatiOnRoot}/$file";
 				if (file_exists($toPath)) continue;
@@ -79,7 +79,7 @@ class Installer extends LibraryInstaller {
                 $createNewConfig = $ans == 'n';
             }
 
-            require_once "{$this -> hatiVendor}hati_config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
+            require_once "{$this -> hatiVendor}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
             $result = ConfigWriter::write($this -> hatiOnRoot, $createNewConfig);
 
             // show the result to the user
@@ -96,7 +96,7 @@ class Installer extends LibraryInstaller {
 
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target) {
         return parent::update($repo, $initial, $target) -> then(function () {
-            require_once "{$this -> hatiVendor}hati_config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
+            require_once "{$this -> hatiVendor}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
             $result = ConfigWriter::write($this -> hatiOnRoot);
 
             // show the result to the user
