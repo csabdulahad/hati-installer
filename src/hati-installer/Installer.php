@@ -86,7 +86,7 @@ class Installer extends LibraryInstaller {
             if ($result['success']) {
                 $this -> io -> info($result['msg']);
 
-                $welcomeFile = $this -> hatiVendor . 'page/welcome.txt';
+                $welcomeFile = __DIR__ . '/page/welcome.txt';
                 if (file_exists($welcomeFile)) include($welcomeFile);
             } else {
                 $this -> io -> error($result['msg']);
