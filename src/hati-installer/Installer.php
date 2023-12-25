@@ -67,11 +67,18 @@ class Installer extends LibraryInstaller {
 			self::rmdir("{$this -> hatiVendor}hati");
 
 			/*
+			 * Check if we have api folder on project root
+			 * */
+			if (!file_exists($this -> root . 'api')) {
+				mkdir($this -> root . 'api');
+			}
+
+			/*
 			 * Move the api files
 			 * */
 			$files = ['index.php', 'hati_api_registry.php', 'hati_api_handler.php'];
 			foreach ($files as $file) {
-				$toPath =  "{$this -> root}/api/$file";
+				$toPath =  "{$this -> root}api/$file";
 				if (file_exists($toPath)) continue;
 
 				// move the file
