@@ -67,6 +67,18 @@ class Installer extends LibraryInstaller {
 			self::rmdir("{$this -> hatiVendor}hati");
 
 			/*
+			 * Move the api files
+			 * */
+			$files = ['index.php', 'hati_api_registry.php', 'hati_api_handler.php'];
+			foreach ($files as $file) {
+				$toPath =  "{$this -> root}/api/$file";
+				if (file_exists($toPath)) continue;
+
+				// move the file
+				rename("{$this -> hatiVendor}api/$file", $toPath);
+			}
+
+			/*
              * Generate/update the hati.json file in the hati folder on the project root
 			 * */
             $createNewConfig = true;

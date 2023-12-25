@@ -1,4 +1,5 @@
 
+
                                   .'``'.__
                                  /      \ `'"-,
                 .-''''--...__..-/ .     |      \
@@ -20,10 +21,11 @@
 |                     Hati - A Speedy PHP Library                   |
 |                             RootData21                            |
 ---------------------------------------------------------------------
-Hati installation successfully. See config folder & consider doing:
+Hati installation successfully. See hati folder & consider doing:
 ➡️ Modify the db & hati json configuration files as per requirements
 ➡️ Adjust the .htaccess file on root directory, placed by Hati
 
 MAKE SURE YOU HAVE PROTECTED ACCESS TO ALL THE HATI FOLDERS BY USING
 SERVER CONFIGURATION OR .htaccess FILE WHICH IS ALREADY PROVIDED AS
 AN EXAMPLE ON THE ROOT DIRECTORY.
+
