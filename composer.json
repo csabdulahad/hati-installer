@@ -1,7 +1,6 @@
 {
-
     "name": "rootdata21/hati-installer",
-    "description": "Instructs Composer to install Hati on project root directory.",
+    "description": "Instructs Composer to install hati config folder on project root directory.",
     "type": "composer-plugin",
     "license": "MIT",
     "authors": [
@@ -25,5 +24,4 @@
         "ext-json": "*",
         "composer/composer": "2.3.0"
     }
-
 }
