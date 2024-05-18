@@ -26,6 +26,15 @@ class Installer extends LibraryInstaller {
 
         $this -> root = $root . DIRECTORY_SEPARATOR;
 		$this -> hatiVendor = $this -> root . 'vendor/rootdata21/hati/hati/';
+		
+		/*
+		 * Support 'src' folder if exists
+		 * */
+		$pathWithSrc = $this->root . 'src' . DIRECTORY_SEPARATOR;
+		if (is_dir($pathWithSrc)) {
+			$this -> root = $pathWithSrc;
+		}
+		
 		$this -> hatiOnRoot = $this -> root . 'hati/';
 
         parent::__construct($io, $composer);
