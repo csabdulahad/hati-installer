@@ -22,64 +22,64 @@ class Installer extends LibraryInstaller {
     protected $composer;
 
     public function __construct(IOInterface $io, PartialComposer $composer, $root) {
-        $this -> composer = $composer;
+        $this->composer = $composer;
 
-        $this -> root = $root . DIRECTORY_SEPARATOR;
-		$this -> hatiVendor = $this -> root . 'vendor/rootdata21/hati/hati/';
+        $this->root = $root . DIRECTORY_SEPARATOR;
+		$this->hatiVendor = $this->root . 'vendor/rootdata21/hati/src/';
 		
 		/*
 		 * Support 'src' folder if exists
 		 * */
 		$pathWithSrc = $this->root . 'src' . DIRECTORY_SEPARATOR;
 		if (is_dir($pathWithSrc)) {
-			$this -> root = $pathWithSrc;
+			$this->root = $pathWithSrc;
 		}
 		
-		$this -> hatiOnRoot = $this -> root . 'hati/';
+		$this->hatiOnRoot = $this->root . 'hati/';
 
         parent::__construct($io, $composer);
     }
 
     public function install(InstalledRepositoryInterface $repo, PackageInterface $package): ?PromiseInterface {
-
         return parent::install($repo, $package) -> then(function () {
 			/*
 			 * Check if we have hati folder on project root
 			 * */
-			if (!file_exists($this -> hatiOnRoot)) {
-				mkdir($this -> hatiOnRoot);
+			if (!file_exists($this->hatiOnRoot)) {
+				mkdir($this->hatiOnRoot);
 			}
 
 			/*
 			 * Move the .htaccess file to the project root
 			 * */
-			$htaccessPath = "{$this -> root}.htaccess";
+			$htaccessPath = "{$this->root}.htaccess";
 			if (!file_exists($htaccessPath)) {
-				rename("{$this -> hatiVendor}hati/.htaccess", $htaccessPath);
+				rename("{$this->hatiVendor}hati/.htaccess", $htaccessPath);
 			}
 
 			/*
 			 * Move important files to hati folder on project root
 			 * */
-			$files = ['db.json', 'init.php', 'tool'];
+			$files = ['db.json', 'init.php'];
+			
 			foreach ($files as $file) {
-				$toPath =  "{$this -> hatiOnRoot}/$file";
+				$toPath =  "{$this->hatiOnRoot}/$file";
 				if (file_exists($toPath)) continue;
 
 				// move the file
-				rename("{$this -> hatiVendor}hati/$file", $toPath);
+				rename("{$this->hatiVendor}hati/$file", $toPath);
 			}
 
 			/*
 			 * Clean up the hati folder
 			 * */
-			self::rmdir("{$this -> hatiVendor}hati");
+			self::rmdir("{$this->hatiVendor}hati");
 
 			/*
 			 * Check if we have api folder on project root
 			 * */
-			if (!file_exists($this -> root . 'api')) {
-				mkdir($this -> root . 'api');
+			if (!file_exists("{$this->root}api")) {
+				mkdir("{$this->root}api");
 			}
 
 			/*
@@ -87,51 +87,51 @@ class Installer extends LibraryInstaller {
 			 * */
 			$files = ['index.php', 'hati_api_registry.php', 'hati_api_handler.php'];
 			foreach ($files as $file) {
-				$toPath =  "{$this -> root}api/$file";
+				$toPath =  "{$this->root}api/$file";
 				if (file_exists($toPath)) continue;
 
 				// move the file
-				rename("{$this -> hatiVendor}api/$file", $toPath);
+				rename("{$this->hatiVendor}api/$file", $toPath);
 			}
 
 			/*
              * Generate/update the hati.json file in the hati folder on the project root
 			 * */
             $createNewConfig = true;
-            if (file_exists("{$this -> hatiOnRoot}hati.json")) {
+            if (file_exists("{$this->hatiOnRoot}hati.json")) {
                 while(true) {
-                    $ans = $this -> io -> ask("\nExisting hati.json found. Do you want to merge it with new config? [y/n]: ");
+                    $ans = $this->io->ask("\nExisting hati.json found. Do you want to merge it with new config? [y/n]: ");
                     if ($ans !== 'y' && $ans !== 'n') continue;
                     break;
                 }
                 $createNewConfig = $ans == 'n';
             }
 
-            require_once "{$this -> hatiVendor}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
-            $result = ConfigWriter::write($this -> hatiOnRoot, $createNewConfig);
+            require_once "{$this->hatiVendor}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
+            $result = ConfigWriter::write($this->hatiOnRoot, $createNewConfig);
 
             // show the result to the user
             if ($result['success']) {
-                $this -> io -> info($result['msg']);
+                $this->io->info($result['msg']);
 
                 $welcomeFile = __DIR__ . '/page/welcome.txt';
                 if (file_exists($welcomeFile)) include($welcomeFile);
             } else {
-                $this -> io -> error($result['msg']);
+                $this->io->error($result['msg']);
             }
         });
     }
 
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target) {
-        return parent::update($repo, $initial, $target) -> then(function () {
-            require_once "{$this -> hatiVendor}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
-            $result = ConfigWriter::write($this -> hatiOnRoot);
+        return parent::update($repo, $initial, $target)->then(function () {
+            require_once "{$this->hatiVendor}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
+            $result = ConfigWriter::write($this->hatiOnRoot);
 
             // show the result to the user
             if ($result['success']) {
-                $this -> io -> info('Hati has been updated successfully');
+                $this->io->info('Hati has been updated successfully');
             } else {
-                $this -> io -> error($result['msg']);
+                $this->io-> error($result['msg']);
             }
         });
     }
