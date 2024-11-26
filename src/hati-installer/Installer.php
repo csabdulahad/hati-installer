@@ -109,6 +109,7 @@ class Installer extends LibraryInstaller {
             }
 
 			if ($exists && $ans == 'n') {
+				$this->welcomeToHati();
 				return;
 			}
 			
@@ -120,15 +121,18 @@ class Installer extends LibraryInstaller {
             // show the result to the user
             if ($result['success']) {
                 $this->io->info($result['msg']);
-
-                $welcomeFile = __DIR__ . '/page/welcome.txt';
-                if (file_exists($welcomeFile)) include($welcomeFile);
+				$this->welcomeToHati();
             } else {
                 $this->io->error($result['msg']);
             }
         });
     }
 
+	private function welcomeToHati(): void {
+		$welcomeFile = __DIR__ . '/page/welcome.txt';
+		if (file_exists($welcomeFile)) include($welcomeFile);
+	}
+	
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target) {
         return parent::update($repo, $initial, $target)->then(function () {
             require_once "{$this->hatiVendor}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
