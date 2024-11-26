@@ -97,16 +97,23 @@ class Installer extends LibraryInstaller {
 			/*
              * Generate/update the hati.json file in the hati folder on the project root
 			 * */
-            $createNewConfig = true;
-            if (file_exists("{$this->hatiOnRoot}hati.json")) {
+			$exists = file_exists("{$this->hatiOnRoot}hati.json");
+			$ans = null;
+			
+            if ($exists) {
                 while(true) {
                     $ans = $this->io->ask("\nExisting hati.json found. Do you want to merge it with new config? [y/n]: ");
                     if ($ans !== 'y' && $ans !== 'n') continue;
                     break;
                 }
-                $createNewConfig = $ans == 'n';
             }
 
+			if ($exists && $ans == 'n') {
+				return;
+			}
+			
+			$createNewConfig = !$exists;
+			
             require_once "{$this->hatiVendor}config" . DIRECTORY_SEPARATOR . "ConfigWriter.php";
             $result = ConfigWriter::write($this->hatiOnRoot, $createNewConfig);
 
